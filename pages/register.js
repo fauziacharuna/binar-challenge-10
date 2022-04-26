@@ -38,6 +38,7 @@ const RegisterPage = () => {
           uid: user.uid,
           displayName,
           email,
+          games_played: [],
           password,
           score: 0,
         });

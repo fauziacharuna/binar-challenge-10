@@ -1,116 +1,113 @@
-import React, { useState, useContext, useEffect } from "react";
-import Navbar from "../../components/Navbar";
-import Player from "../../components/Player";
-import firebaseDB from "../../config/firebaseDB";
+import React, { useState, useEffect } from "react";
+import { Card, Button } from "react-bootstrap";
+import NavbarComponent from "../../components/Navbar";
+import Image from "next/image";
+import scissors from "../../public/assets/gunting.png";
+import Link from "next/link";
 import {
   doc,
-  updateDoc,
   where,
   getDocs,
   query,
   collection,
+  addDoc,
+  updateDoc,
 } from "firebase/firestore";
-import { Navigate, useLocation } from "react-router-dom";
+import firebaseDB from "../../config/firebaseDB";
+import { useSelector } from "react-redux";
+import { getAuth } from "firebase/auth";
+import { useRouter } from "next/router";
 
-function Game() {
-  const location = useLocation();
-  const authenticatedUser = useContext(AuthContext);
-  const weapons = ["rock", "paper", "scissors"];
-  const [playerOne, setPlayerOne] = useState(weapons[0]);
-  const [playerTwo, setPlayerTwo] = useState(weapons[0]);
-  const [winner, setWinner] = useState("");
+const ListGame = () => {
+  const router = useRouter();
+  const authenticatedUser = useSelector(
+    (state) => state.auth.authenticatedUser
+  );
+  console.log(authenticatedUser.uid);
+  const [playedGames, setPlayedGames] = useState([]);
+  console.log("played Games user", playedGames);
   const [uid, setUid] = useState("");
-  const [scoreFromDoc, setScoreFromDoc] = useState(0);
-  const [score, setScore] = useState(0);
 
-  useEffect(() => {
-    switch (playerOne + playerTwo) {
-      case "scissorspaper":
-      case "rockscissors":
-      case "paperrock":
-        setWinner("YOU WIN!");
-        setScore(score + 1);
-        break;
-      case "paperscissors":
-      case "scissorsrock":
-      case "rockpaper":
-        setWinner("YOU LOSE!");
-        break;
-      case "rockrock":
-      case "paperpaper":
-      case "scissorsscissors":
-        setWinner("ITS A DRAW!");
-        break;
-    }
-  }, [playerOne, playerTwo]);
-
-  const selectWeapon = (weapon) => {
-    setPlayerOne(weapon);
-    setPlayerTwo(weapons[Math.floor(Math.random() * weapons.length)]);
-    setWinner("");
-  };
-
-  const updateScore = async () => {
+  const getPlayedGames = async () => {
     const q = query(
       collection(firebaseDB, "users"),
       where("uid", "==", authenticatedUser.uid)
     );
     const querySnapshot = await getDocs(q);
     const res = querySnapshot.forEach((doc) => {
-      console.log(doc.id, " => ", doc.data().score);
+      console.log(doc.id, " => ", doc.data().games_played);
       setUid(doc.id);
-      setScoreFromDoc(doc.data().score);
+      if (doc.data().games_played === undefined) {
+        setPlayedGames([]);
+      } else {
+        setPlayedGames(doc.data().games_played);
+      }
     });
+  };
+  const submitToSuwit = async () => {
     const docId = doc(firebaseDB, "users", uid);
-
-    if (score > scoreFromDoc) {
-      await updateDoc(docId, {
-        score,
-      });
-    } else {
-      return;
-    }
+    console.log(uid);
+    playedGames.push("suwit");
+    const condition = playedGames.includes("suwit");
+    await updateDoc(docId, {
+      games_played: playedGames,
+    });
+    router.push("/Game/Suwit");
   };
 
-  if (authenticatedUser === null) {
-    return <Navigate to={"/login"} replace state={{ from: location }} />;
-  } else {
-    return (
-      <>
-        <Navbar />
-        <h1 style={{ textAlign: "center" }}>Rock Paper Scissors</h1>
-        <div className="text-center">
-          <div>
-            <Player weapon={playerOne} />
-            <Player weapon={playerTwo} />
-          </div>
-          <div>
-            <button className="weaponBtn" onClick={() => selectWeapon("rock")}>
-              rock
-            </button>
-            <button className="weaponBtn" onClick={() => selectWeapon("paper")}>
-              paper
-            </button>
-            <button
-              className="weaponBtn"
-              onClick={() => selectWeapon("scissors")}
-            >
-              scissor
-            </button>
-          </div>
-          <div className="winner">{winner}</div>
-          <div>
-            <h1>Score: {score}</h1>
-          </div>
-          <div>
-            <h1>Player: {authenticatedUser.displayName}</h1>
-            {console.log(authenticatedUser.displayName)}
-          </div>
-        </div>
-        <button onClick={() => updateScore()}>Submit Score</button>
-      </>
-    );
-  }
-}
+  const submitToRandom = async () => {
+    const docId = doc(firebaseDB, "users", uid);
+    console.log(uid);
+    playedGames.push("random");
+    const condition = playedGames.includes("random");
+    await updateDoc(docId, {
+      games_played: playedGames,
+    });
+    router.push("/Game/Random");
+  };
 
-export default Game;
+  useEffect(() => {
+    getPlayedGames();
+  }, []);
+
+  return (
+    <>
+      <NavbarComponent />
+      <div>List Game</div>
+      <div className="d-flex justify-content-center gap-5 mt-5">
+        <Card style={{ width: "18rem" }}>
+          <Image variant="top" src={scissors} width={250} height={200} />
+          <Card.Body>
+            <Card.Title>Suwit Game</Card.Title>
+            <Card.Text>
+              Uji keberuntungan mu dengan memainkan game ini dan jadilah
+              juaranya!!
+            </Card.Text>
+            <p>
+              {playedGames.includes("suwit") ? "Game has been played" : null}
+            </p>
+            <Button onClick={(event) => submitToSuwit(event)}>Play Now!</Button>
+          </Card.Body>
+        </Card>
+        <Card style={{ width: "18rem" }}>
+          <Card.Img variant="top" src="holder.js/100px180" />
+          <Card.Body>
+            <Card.Title>Random Game (TBA)</Card.Title>
+            <Card.Text>
+              Some quick example text to build on the card title and make up the
+              bulk of the card's content.
+            </Card.Text>
+            <p>
+              {playedGames.includes("random") ? "Game has been played" : null}
+            </p>
+            <Button onClick={(event) => submitToRandom(event)}>
+              Play Now!
+            </Button>
+          </Card.Body>
+        </Card>
+      </div>
+    </>
+  );
+};
+
+export default ListGame;
