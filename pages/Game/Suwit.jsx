@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../../components/Navbar";
 import Player from "../../components/Player";
 import firebaseDB from "../../config/firebaseDB";
@@ -14,6 +14,7 @@ import {
 import { useRouter } from "next/router";
 import Authenticated from "../../middlewares/Authenticated";
 import styles from "../../styles/Game.module.css";
+import { updateScore } from "../../redux/slices/gameSlice";
 
 function Game() {
   const weapons = ["rock", "paper", "scissors"];
@@ -23,11 +24,14 @@ function Game() {
   const [uid, setUid] = useState("");
   const [scoreFromDoc, setScoreFromDoc] = useState(0);
   const [score, setScore] = useState(0);
+  const [round, setRound] = useState(0);
   const authenticatedUser = useSelector(
     (state) => state.auth.authenticatedUser
   );
 
   console.log("aku adalah authenticated user:", authenticatedUser);
+
+ 
 
   const getQuery = async () => {
     const q = query(
@@ -66,6 +70,7 @@ function Game() {
 
   const selectWeapon = (weapon) => {
     setPlayerOne(weapon);
+    setRound(round + 1);
     setPlayerTwo(weapons[Math.floor(Math.random() * weapons.length)]);
     setWinner("");
   };
@@ -75,10 +80,11 @@ function Game() {
     const docId = doc(firebaseDB, "users", uid);
 
     if (score > scoreFromDoc) {
-      await updateDoc(docId, {
+      await updateDoc(docId, updateScore({
         score,
-      });
-    }
+        round,
+      })); 
+    } 
   };
 
   return (
