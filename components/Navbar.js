@@ -1,9 +1,11 @@
 import { Nav, Button, Container, Navbar } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/slices/authSlice";
+import { useRouter } from "next/router";
 
 import Link from "next/link";
 const NavbarComponent = () => {
+  const router = useRouter();
   const auth = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
@@ -12,7 +14,7 @@ const NavbarComponent = () => {
   );
 
   const onSignOutClick = async () => {
-    await dispatch(logout());
+    dispatch(logout());
   };
   return (
     <Navbar bg="dark" expand="lg" variant="dark">

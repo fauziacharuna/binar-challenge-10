@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import firebaseAuth from "../../config/firebaseAuth";
 import { signOut } from "firebase/auth";
+import { useRouter } from "next/router";
 
 export const attemptAuth = createAsyncThunk(
   "auth/attemptAuth",

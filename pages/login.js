@@ -13,6 +13,7 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Guest from "../middlewares/Guest";
+import { Spinner } from "react-bootstrap";
 
 function LoginPage() {
   const dispatch = useDispatch();
@@ -31,37 +32,6 @@ function LoginPage() {
     event.preventDefault();
     dispatch(attemptAuth(auth.form));
   };
-
-  // const onGoogleLogin = () => {
-  //   const provider = new GoogleAuthProvider();
-  //   provider.setCustomParameters({
-  //     login_hint: "user@example.com",
-  //   });
-  //   const auth = getAuth();
-  //   signInWithPopup(auth, provider)
-  //     .then((result) => {
-  //       // This gives you a Google Access Token. You can use it to access the Google API.
-  //       const credential = GoogleAuthProvider.credentialFromResult(result);
-  //       const token = credential.accessToken;
-  //       // The signed-in user info.
-  //       const user = result.user;
-  //       Swal.fire("Success", `${user.email} Berhasil ditambahkan`, "success");
-
-  //       if (token && user) {
-  //         navigate("/");
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       // Handle Errors here.
-  //       const errorCode = error.code;
-  //       const errorMessage = error.message;
-  //       // The email of the user's account used.
-  //       const email = error.email;
-  //       // The AuthCredential type that was used.
-  //       const credential = GoogleAuthProvider.credentialFromError(error);
-  //       // ...
-  //     });
-  // };
 
   const onValueChange = (event, label) => {
     const value = event.target.value;
@@ -144,22 +114,27 @@ function LoginPage() {
                       name="password"
                       onChange={onInputChange}
                     />
-                    <button
-                      className="w-100"
-                      style={{
-                        marginTop: "36px",
-                        height: "46px",
-                        background: "#F2C94C",
-                        borderRadius: "8px",
-                        color: "#FFFFFF",
-                        fontSize: "16px",
-                        border: "none",
-                      }}
-                      disabled={auth.isLoading}
-                      type="submit"
-                    >
-                      MASUK
-                    </button>
+                    {auth.isLoading ? (
+                      <div className="d-flex justify-content-center">
+                        <Spinner animation="border" variant="primary" />
+                      </div>
+                    ) : (
+                      <button
+                        className="w-100"
+                        style={{
+                          marginTop: "36px",
+                          height: "46px",
+                          background: "#F2C94C",
+                          borderRadius: "8px",
+                          color: "#FFFFFF",
+                          fontSize: "16px",
+                          border: "none",
+                        }}
+                        type="submit"
+                      >
+                        MASUK
+                      </button>
+                    )}
                   </form>
                 </div>
                 <p

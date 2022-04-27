@@ -17,32 +17,36 @@ import firebaseDB from "../../config/firebaseDB";
 import { useSelector } from "react-redux";
 import { getAuth } from "firebase/auth";
 import { useRouter } from "next/router";
+import Authenticated from "../../middlewares/Authenticated";
 
 const ListGame = () => {
   const router = useRouter();
   const authenticatedUser = useSelector(
     (state) => state.auth.authenticatedUser
   );
-  console.log(authenticatedUser.uid);
   const [playedGames, setPlayedGames] = useState([]);
   console.log("played Games user", playedGames);
   const [uid, setUid] = useState("");
 
   const getPlayedGames = async () => {
-    const q = query(
-      collection(firebaseDB, "users"),
-      where("uid", "==", authenticatedUser.uid)
-    );
-    const querySnapshot = await getDocs(q);
-    const res = querySnapshot.forEach((doc) => {
-      console.log(doc.id, " => ", doc.data().games_played);
-      setUid(doc.id);
-      if (doc.data().games_played === undefined) {
-        setPlayedGames([]);
-      } else {
-        setPlayedGames(doc.data().games_played);
-      }
-    });
+    try {
+      const q = query(
+        collection(firebaseDB, "users"),
+        where("uid", "==", authenticatedUser.uid)
+      );
+      const querySnapshot = await getDocs(q);
+      const res = querySnapshot.forEach((doc) => {
+        console.log(doc.id, " => ", doc.data().games_played);
+        setUid(doc.id);
+        if (doc.data().games_played === undefined) {
+          setPlayedGames([]);
+        } else {
+          setPlayedGames(doc.data().games_played);
+        }
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
   };
   const submitToSuwit = async () => {
     const docId = doc(firebaseDB, "users", uid);
@@ -71,7 +75,7 @@ const ListGame = () => {
   }, []);
 
   return (
-    <>
+    <Authenticated>
       <NavbarComponent />
       <div>List Game</div>
       <div className="d-flex justify-content-center gap-5 mt-5">
@@ -106,7 +110,7 @@ const ListGame = () => {
           </Card.Body>
         </Card>
       </div>
-    </>
+    </Authenticated>
   );
 };
 

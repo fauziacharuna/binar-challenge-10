@@ -29,7 +29,21 @@ function Game() {
 
   console.log("aku adalah authenticated user:", authenticatedUser);
 
+  const getQuery = async () => {
+    const q = query(
+      collection(firebaseDB, "users"),
+      where("uid", "==", authenticatedUser.uid)
+    );
+    const querySnapshot = await getDocs(q);
+    const res = querySnapshot.forEach((doc) => {
+      console.log(doc.id, " => ", doc.data().score);
+      setUid(doc.id);
+      setScoreFromDoc(doc.data().score);
+    });
+  };
+
   useEffect(() => {
+    getQuery();
     switch (playerOne + playerTwo) {
       case "scissorspaper":
       case "rockscissors":
@@ -58,16 +72,6 @@ function Game() {
 
   const updateScore = async (event) => {
     event.preventDefault();
-    const q = query(
-      collection(firebaseDB, "users"),
-      where("uid", "==", authenticatedUser.uid)
-    );
-    const querySnapshot = await getDocs(q);
-    const res = querySnapshot.forEach((doc) => {
-      console.log(doc.id, " => ", doc.data().score);
-      setUid(doc.id);
-      setScoreFromDoc(doc.data().score);
-    });
     const docId = doc(firebaseDB, "users", uid);
 
     if (score > scoreFromDoc) {
